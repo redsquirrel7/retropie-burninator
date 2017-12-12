@@ -1,0 +1,131 @@
+#!/bin/python
+#
+#
+# ________  _______  _________  ________  ________  ________  ___  _______
+#|\   __  \|\  ___ \|\___   ___\\   __  \|\   __  \|\   __  \|\  \|\  ___ \
+#\ \  \|\  \ \   __/\|___ \  \_\ \  \|\  \ \  \|\  \ \  \|\  \ \  \ \   __/|
+# \ \   _  _\ \  \_|/__  \ \  \ \ \   _  _\ \  \\\  \ \   ____\ \  \ \  \_|/__
+#  \ \  \\  \\ \  \_|\ \  \ \  \ \ \  \\  \\ \  \\\  \ \  \___|\ \  \ \  \_|\ \
+#   \ \__\\ _\\ \_______\  \ \__\ \ \__\\ _\\ \_______\ \__\    \ \__\ \_______\
+#    \|__|\|__|\|_______|   \|__|  \|__|\|__|\|_______|\|__|     \|__|\|_______|
+#
+#
+#
+# ________  ________          ________  ________  ________  ________
+#|\   ____\|\   ___ \        |\   ____\|\   __  \|\   __  \|\   ___ \
+#\ \  \___|\ \  \_|\ \       \ \  \___|\ \  \|\  \ \  \|\  \ \  \_|\ \
+# \ \_____  \ \  \ \\ \       \ \  \    \ \   __  \ \   _  _\ \  \ \\ \
+#  \|____|\  \ \  \_\\ \       \ \  \____\ \  \ \  \ \  \\  \\ \  \_\\ \
+#    ____\_\  \ \_______\       \ \_______\ \__\ \__\ \__\\ _\\ \_______\
+#   |\_________\|_______|        \|_______|\|__|\|__|\|__|\|__|\|_______|
+#   \|_________|
+#
+#
+# ________  ___  ___  ________  ________   ___  ________   ________  _________  ________  ________
+#|\   __  \|\  \|\  \|\   __  \|\   ___  \|\  \|\   ___  \|\   __  \|\___   ___\\   __  \|\   __  \
+#\ \  \|\ /\ \  \\\  \ \  \|\  \ \  \\ \  \ \  \ \  \\ \  \ \  \|\  \|___ \  \_\ \  \|\  \ \  \|\  \
+# \ \   __  \ \  \\\  \ \   _  _\ \  \\ \  \ \  \ \  \\ \  \ \   __  \   \ \  \ \ \  \\\  \ \   _  _\
+#  \ \  \|\  \ \  \\\  \ \  \\  \\ \  \\ \  \ \  \ \  \\ \  \ \  \ \  \   \ \  \ \ \  \\\  \ \  \\  \|
+#   \ \_______\ \_______\ \__\\ _\\ \__\\ \__\ \__\ \__\\ \__\ \__\ \__\   \ \__\ \ \_______\ \__\\ _\
+#    \|_______|\|_______|\|__|\|__|\|__| \|__|\|__|\|__| \|__|\|__|\|__|    \|__|  \|_______|\|__|\|__| V1.0
+#
+# 
+#
+#
+#
+# Prepares SD card for use in Retropie system.
+# Extracts Retropie image, and burns it onto your SD card.
+# Some code recycled from bootable-usb-0.2: https://pypi.python.org/pypi/bootable-usb/0.2
+# By Brad Nelson (Squirrel) 
+# Twitter: @redsquirrel_7
+#
+
+from subprocess import check_output, call, DEVNULL, STDOUT
+import glob
+import os
+import time
+import signal
+import sys
+
+# Find Retropie archive
+def find_image():
+    files = 0
+    for file in glob.glob("retropie*.img.gz"):
+        files = files + 1
+        if files == 0:
+            print("No Retropie archive found! \nPlease copy a Retropie gzip archive to the same folder as this script.")
+        elif files > 1:
+            print("Which one do you want to use?")
+        else:
+            archive_file = str(file)
+            print("Found Retropie archive: %s" % archive_file)
+            extract_archive(archive_file)
+
+
+# Extract archive
+def extract_archive(archive):
+    print("Extracting", archive, "...")
+    call('gunzip %s' % archive, shell=True)
+    print("Done")
+    for file in glob.glob("*.img"):
+        image = str(file)
+    find_sd(image)
+
+# Find SD card
+def find_sd(image_file):
+    while True:
+        usb_list = check_output('ls -l /dev/disk/by-id/', shell=True).decode('utf-8').split('\n')[:-1]
+        labels = []
+        print('\nUSB Drives attached to this computer:')
+        i = 0
+        has_usb = False
+        for d in usb_list:
+            if not d[-1].isdigit() and 'usb' in d:
+                name = ' '.join(d.split('usb-')[1].split('_')[:-1])
+                label = d.split('/')[-1]
+                labels.append(label)
+                size = int(check_output('cat /sys/class/block/%s/size' % label, shell=True)) / 2 / 1024 / 1024
+                print('\t(%d) %s - %.2f GB' % (i, name, size))
+                i += 1
+                has_usb = True
+        if not has_usb:
+            print("\tPlease insert your SD card, and run this script again.")
+            exit()
+        else:
+            break
+
+    while True:
+        selected_drive = input("Select your SD card. (default: 0) ")
+        if selected_drive.isdigit() and int(selected_drive) < len(labels):
+            selected_drive = "/dev/" + labels[int(selected_drive)]
+            burn_image(image_file, selected_drive)
+        elif selected_drive == "":
+            selected_drive = "/dev/" + labels[0]
+            burn_image(image_file, selected_drive)
+        else:
+            print("Type a valid number please!\n")
+            continue
+
+# Burn image to SD card
+def burn_image(image_file, sd_card):
+    while True:
+        sure = True if input("This will erase everything on %s! Are you sure? (y/n) " % sd_card) == 'y' else False
+
+        if sure:
+            is_mounted = True if call('mount | grep %s' % sd_card, shell=True, stdout=DEVNULL, stderr=STDOUT) == 0 else False
+            if is_mounted:
+                mount_part = check_output('mount | grep %s' % sd_card, shell=True).decode('utf-8').split(' on')[0]
+                call('umount %s' % mount_part, shell=True)
+                print("Drive unmounted!")
+            call('sudo mkdosfs -F 32 -I %s' % sd_card, shell=True)
+            call('sudo dd if=%s of=%s bs=4M oflag=direct status=progress' % (image_file, sd_card), shell=True)
+            print("\nYour SD card is ready!")
+            print("\nEnjoy your Retropie system!")
+            exit()
+        else:
+            exit()
+
+
+
+find_image()
+
