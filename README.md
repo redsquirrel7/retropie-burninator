@@ -8,4 +8,6 @@ plug your SD card into your computer, and run the burninator.
 At this time, the script will only work in Linux. 
 The user that executes the script must be in the system's sudoers file.
 
+Feel free to modify and make the burninator better!
+
 If you have questions, tweet at me: @redsquirrel_7
