@@ -11,3 +11,6 @@ The user that executes the script must be in the system's sudoers file.
 Feel free to modify and make the burninator better!
 
 If you have questions, tweet at me: @redsquirrel_7
+
+V1.1 Release notes:
+- Fixed umount permission error
