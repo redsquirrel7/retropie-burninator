@@ -27,7 +27,7 @@
 # \ \   __  \ \  \\\  \ \   _  _\ \  \\ \  \ \  \ \  \\ \  \ \   __  \   \ \  \ \ \  \\\  \ \   _  _\
 #  \ \  \|\  \ \  \\\  \ \  \\  \\ \  \\ \  \ \  \ \  \\ \  \ \  \ \  \   \ \  \ \ \  \\\  \ \  \\  \|
 #   \ \_______\ \_______\ \__\\ _\\ \__\\ \__\ \__\ \__\\ \__\ \__\ \__\   \ \__\ \ \_______\ \__\\ _\
-#    \|_______|\|_______|\|__|\|__|\|__| \|__|\|__|\|__| \|__|\|__|\|__|    \|__|  \|_______|\|__|\|__| V1.0
+#    \|_______|\|_______|\|__|\|__|\|__| \|__|\|__|\|__| \|__|\|__|\|__|    \|__|  \|_______|\|__|\|__| V1.1
 #
 # 
 #
@@ -115,7 +115,7 @@ def burn_image(image_file, sd_card):
             is_mounted = True if call('mount | grep %s' % sd_card, shell=True, stdout=DEVNULL, stderr=STDOUT) == 0 else False
             if is_mounted:
                 mount_part = check_output('mount | grep %s' % sd_card, shell=True).decode('utf-8').split(' on')[0]
-                call('umount %s' % mount_part, shell=True)
+                call('sudo umount %s' % mount_part, shell=True)
                 print("Drive unmounted!")
             call('sudo mkdosfs -F 32 -I %s' % sd_card, shell=True)
             call('sudo dd if=%s of=%s bs=4M oflag=direct status=progress' % (image_file, sd_card), shell=True)
