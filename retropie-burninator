@@ -27,7 +27,7 @@
 # \ \   __  \ \  \\\  \ \   _  _\ \  \\ \  \ \  \ \  \\ \  \ \   __  \   \ \  \ \ \  \\\  \ \   _  _\
 #  \ \  \|\  \ \  \\\  \ \  \\  \\ \  \\ \  \ \  \ \  \\ \  \ \  \ \  \   \ \  \ \ \  \\\  \ \  \\  \|
 #   \ \_______\ \_______\ \__\\ _\\ \__\\ \__\ \__\ \__\\ \__\ \__\ \__\   \ \__\ \ \_______\ \__\\ _\
-#    \|_______|\|_______|\|__|\|__|\|__| \|__|\|__|\|__| \|__|\|__|\|__|    \|__|  \|_______|\|__|\|__| V1.1
+#    \|_______|\|_______|\|__|\|__|\|__| \|__|\|__|\|__| \|__|\|__|\|__|    \|__|  \|_______|\|__|\|__| V1.2
 #
 # 
 #
@@ -52,14 +52,16 @@ def find_image():
     files = 0
     for file in glob.glob("retropie*.img.gz"):
         files = files + 1
-        if files == 0:
-            print("No Retropie archive found! \nPlease copy a Retropie gzip archive to the same folder as this script.")
-        elif files > 1:
-            print("Which one do you want to use?")
-        else:
-            archive_file = str(file)
-            print("Found Retropie archive: %s" % archive_file)
-            extract_archive(archive_file)
+    if files == 0:
+        print("No Retropie archive found! \nPlease copy a Retropie gzip archive to the same folder as this script.")
+        exit()
+    elif files > 1:
+        print("There is more than one Retropie archive in this folder. \nPlease remove all but one.")
+        exit()
+    else:
+        archive_file = str(file)
+        print("Found Retropie archive: %s" % archive_file)
+        extract_archive(archive_file)
 
 
 # Extract archive
