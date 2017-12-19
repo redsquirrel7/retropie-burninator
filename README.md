@@ -14,3 +14,7 @@ If you have questions, tweet at me: @redsquirrel_7
 
 V1.1 Release notes:
 - Fixed umount permission error
+
+V1.2 Release notes:
+- Fixed check for archives
+- Changed message for when there is more than one archive found
