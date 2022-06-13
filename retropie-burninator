@@ -36,7 +36,7 @@
 # Prepares SD card for use in Retropie system.
 # Extracts Retropie image, and burns it onto your SD card.
 # Some code recycled from bootable-usb-0.2: https://pypi.python.org/pypi/bootable-usb/0.2
-# By Brad Nelson (Squirrel) 
+# By Squ1rr3l 
 # Twitter: @redsquirrel_7
 #
 
